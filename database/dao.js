@@ -1,5 +1,5 @@
 db = require('./create_database.js');
-//prediction = require('prediction.js')
+Prediction = require('../models/prediction.js')
 
 class Dao {
     insertPrediction(prediction) {
@@ -17,5 +17,17 @@ class Dao {
         prediction.getPredictionLow()
         ).changes;
     }
+    selectPredictionsByLocationAndDate(location, predictionDate) {
+        let predictions = [];
+        const stmt = db.prepare(`
+            SELECT * FROM predictions WHERE location = ? AND prediction_datetime LIKE ?`);
+        let result = stmt.all(location, `%${predictionDate}%`);
+        for (let i=0; i<result.length; i++) {
+            predictions.push(new Prediction(result[i].weather_service, result[i].location, result[i].recorded_datetime, result[i].prediction_datetime, result[i].prediction_length, result[i].prediction_high, result[i].prediction_low));
+        }
+        return predictions;
+    }
+
+
 }
 module.exports = Dao;

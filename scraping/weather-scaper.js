@@ -5,23 +5,31 @@ Prediction = require('../models/prediction.js');
 
 
 (async () => {
-    const url = 'https://www.accuweather.com/en/us/plymouth/02360/daily-weather-forecast/333581';
+    const url = 'https://www.accuweather.com/en/us/norton/02766/daily-weather-forecast/2251408';
     const response = await fetch(url);
 
     const $ = cheerio.load(await response.text());
     
+    
     let tempsArray = getTemps($);
     let highs = getHighs(tempsArray);
     let lows = getLows(tempsArray);
-    let date = getDatetimes(highs);
 
+    let numPredictions = highs.length-1; //326704
+
+    let weatherServiceArray = getWeatherServiceArray(numPredictions);
+    let location = $('h1').text();
+    let locationArray = getLocationArray(numPredictions, location);
+    let recordedDatetimeArray = getCurrentDatetimeArray(numPredictions);
+    let predictionDatetimeArray = getPredictionDatetimeArray(numPredictions);
+    let predictionLengthArray = getPredictionLengthArray(numPredictions);
     
     
-    const title = $('h1').text();
     const dao = new Dao();
-    dao.insertPrediction(new Prediction('accuweather','Plymouth MA', 'Today', 'Tomorrow', 1, 25, 14));
-    
-    
+    savePredictions(dao, weatherServiceArray, locationArray, recordedDatetimeArray, predictionDatetimeArray, predictionLengthArray, highs, lows, numPredictions);
+    let jan7Predictions = dao.selectPredictionsByLocationAndDate('Plymouth, MA', '2026-01-07');
+    let jan7Prediction = jan7Predictions[0];
+    console.log(`On ${new Date(jan7Prediction.getRecordedDatetime())}, ${jan7Prediction.getWeatherService()} predicted that the high would be ${jan7Prediction.getPredictionHigh()} on ${new Date(jan7Prediction.getPredictionDatetime())}`);
 
 }) ();
 
@@ -43,14 +51,54 @@ function getLows(tempsArray) {
     return lows.map(value => value.replace('/', ''));
 }
 
-function getDatetimes(highs) {
-    let currentDatetime = new Date();
-    datetimes = [];
-    for (let i=0; i<highs.length-1; i++) {
-        datetimes.push(new Date(currentDatetime.getTime() + 86400000 * i));
+function getWeatherServiceArray(numPredictions) {
+    weatherServices = [];
+    for (let i=0; i<numPredictions; i++) {
+       weatherServices.push('accuweather');
     }
-    return datetimes;
+    return weatherServices;
+}
 
+function getLocationArray(numPredictions, location) {
+    locations = [];
+    for (let i=0; i<numPredictions; i++) {
+        locations.push(location);
+    }
+    return locations;
+}
+
+function getCurrentDatetimeArray(numPredictions) {
+    let currentDatetime = new Date();
+    let currentDatetimes = [];
+    for (let i=0; i<numPredictions; i++) {
+        currentDatetimes.push(currentDatetime.toISOString());
+        console.log(currentDatetime.toISOString());
+    }
+    return currentDatetimes;
+}
+
+function getPredictionDatetimeArray(numPredictions) {
+    let currentDatetime = new Date();
+    predictionDatetimes = [];
+    for (let i=0; i<numPredictions; i++) {
+        predictionDatetimes.push((new Date(currentDatetime.getTime() + 86400000 * i)).toISOString());
+    }
+    return predictionDatetimes;
+
+}
+
+function getPredictionLengthArray(numPredictions) {
+    predictionLengths = [];
+    for (let i=0; i<numPredictions; i++) {
+        predictionLengths.push(i);
+    }
+    return predictionLengths;
+}
+
+function savePredictions(dao, weatherServiceArray, locationArray, recordedDatetimeArray, predictionDatetimeArray, predictionLengthArray, highs, lows, numPredictions) {
+    for (let i=0; i<numPredictions; i++) {
+        dao.insertPrediction(new Prediction(weatherServiceArray[i], locationArray[i], recordedDatetimeArray[i], predictionDatetimeArray[i], predictionLengthArray[i], highs[i], lows[i]));
+    }
 }
 
 async function writeToFile(filename, data) {
