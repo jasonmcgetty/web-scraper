@@ -11,7 +11,18 @@ db.exec(`
         prediction_length INTEGER NOT NULL,
         prediction_high INTEGER NOT NULL,
         prediction_low INTEGER NOT NULL
-    ); `
+    ); 
+
+    CREATE TABLE IF NOT EXISTS past_dates (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        source TEXT NOT NULL,
+        location TEXT NOT NULL,
+        location_zip INTEGER NOT NULL,
+        date TEXT NOT NULL,
+        date_high INTEGER NOT NULL,
+        date_low INTEGER NOT NULL
+    ); 
+`
 );
 
 module.exports = db;

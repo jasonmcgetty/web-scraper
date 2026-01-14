@@ -31,6 +31,9 @@ Prediction = require('../models/prediction.js');
     let jan7Prediction = jan7Predictions[0];
     console.log(`On ${new Date(jan7Prediction.getRecordedDatetime())}, ${jan7Prediction.getWeatherService()} predicted that the high would be ${jan7Prediction.getPredictionHigh()} on ${new Date(jan7Prediction.getPredictionDatetime())}`);
 
+    let plymouthPredictions = dao.selectPredictionsByLocation('Plymouth, MA');
+    console.log(plymouthPredictions);
+
 }) ();
 
 function getTemps($) {
@@ -100,6 +103,7 @@ function savePredictions(dao, weatherServiceArray, locationArray, recordedDateti
         dao.insertPrediction(new Prediction(weatherServiceArray[i], locationArray[i], recordedDatetimeArray[i], predictionDatetimeArray[i], predictionLengthArray[i], highs[i], lows[i]));
     }
 }
+
 
 async function writeToFile(filename, data) {
     try {
