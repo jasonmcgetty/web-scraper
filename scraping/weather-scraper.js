@@ -26,13 +26,13 @@ Prediction = require('../models/prediction.js');
     
     
     const dao = new Dao();
-    savePredictions(dao, weatherServiceArray, locationArray, recordedDatetimeArray, predictionDatetimeArray, predictionLengthArray, highs, lows, numPredictions);
+    //savePredictions(dao, weatherServiceArray, locationArray, recordedDatetimeArray, predictionDatetimeArray, predictionLengthArray, highs, lows, numPredictions);
     let jan7Predictions = dao.selectPredictionsByLocationAndDate('Plymouth, MA', '2026-01-07');
     let jan7Prediction = jan7Predictions[0];
     console.log(`On ${new Date(jan7Prediction.getRecordedDatetime())}, ${jan7Prediction.getWeatherService()} predicted that the high would be ${jan7Prediction.getPredictionHigh()} on ${new Date(jan7Prediction.getPredictionDatetime())}`);
 
     let plymouthPredictions = dao.selectPredictionsByLocation('Plymouth, MA');
-    console.log(plymouthPredictions);
+    console.log(plymouthPredictions[0].getPredictionDatetime().substring(0,10));
 
 }) ();
 

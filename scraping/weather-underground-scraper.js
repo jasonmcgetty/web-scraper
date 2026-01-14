@@ -2,6 +2,7 @@ const cheerio = require('cheerio');
 const Dao = require('../database/dao.js');
 Prediction = require('../models/prediction.js');
 PastDate = require('../models/past-date.js');
+Calculations = require('../calculations/calculations.js');
 
 (async () => {
 
@@ -37,8 +38,13 @@ PastDate = require('../models/past-date.js');
     const dao = new Dao();
     //savePastDates(dao, source, location, -1, dates, date_highs, date_lows);
     console.log('Success!');
+    let plymouthPrediction = dao.selectPredictionsByLocationAndDate('Plymouth, MA', '2026-01-13');
+    let plymouthWeather = dao.selectPastDatesByLocationAndDate('Plymouth, MA', '2026-01-13');
+    
+    Calculations.calculateHighDifferenceSingleDate(plymouthPrediction[0], plymouthWeather[0]);
+    
+    
 
-    let plymouthWeather = dao.selectPastDatesByLocation('Plymouth, MA');
 
 
 
